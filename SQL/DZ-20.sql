@@ -1,5 +1,5 @@
 --Напишите скрипт, который с помощью цикла и переменной выводит таблицу умножения для заданного числа.
-/*
+
 DECLARE @ourNumber INT;
 DECLARE @Counter INT;
 DECLARE @Result INT;
@@ -15,10 +15,8 @@ CREATE TABLE MyResult (
 WHILE @Counter <= 20
 BEGIN
 	SET @Result= @Counter * @ourNumber;
-
 	INSERT INTO MyResult (MyNumber, MyCounter, Result)
 	VALUES (@ourNumber, @Counter, @Result)
-
 	SET @Counter=@Counter+1
 END
 
@@ -54,13 +52,53 @@ JOIN (
 	  GROUP BY soh.CustomerID
 	 ) res ON res.CustomerID=sc.CustomerID
 WHERE res.SumPerson > @SumCount
-*/
 
 --Таблицы: 
 --Sales.SalesOrderDetail
 --Sales.SalesOrderHeader
 --Production.Product
 --Описание задачи: Напишите запрос, который с использованием переменной и подзапроса определяет самый продаваемый товар (по количеству проданных единиц) для каждого года.
+DECLARE @Year INT;
 
+-- Создаем временную таблицу для хранения результатов
+CREATE TABLE TopProducts (
+    Year INT,
+    ProductID INT,
+    TotalQuantity INT
+);
+
+-- Цикл по годам
+DECLARE @StartYear INT = 2000; -- Задайте начальный год
+DECLARE @EndYear INT = 2023;   -- Задайте конечный год
+
+WHILE @StartYear <= @EndYear
+BEGIN
+    SET @Year = @StartYear;
+	-- Подзапрос для нахождения самого продаваемого товара за текущий год
+    INSERT INTO TopProducts (Year, ProductID, TotalQuantity)
+    SELECT TOP 1 
+		   YEAR(soh.OrderDate) AS Year
+		 , sod.ProductID
+		 , SUM(sod.OrderQty) AS TotalQuantity
+    FROM Sales.SalesOrderHeader AS soh
+    JOIN Sales.SalesOrderDetail AS sod ON soh.SalesOrderID = sod.SalesOrderID
+    WHERE YEAR(soh.OrderDate) = @Year
+    GROUP BY sod.ProductID,soh.OrderDate
+    ORDER BY  TotalQuantity DESC;
+    SET @StartYear = @StartYear + 1;
+END
+
+-- Вывод результатов
+SELECT 
+    Year,
+    ProductID,
+    TotalQuantity
+FROM 
+    TopProducts
+ORDER BY 
+    Year;
+
+-- Удаляем временную таблицу
+DROP TABLE TopProducts;
 
 
