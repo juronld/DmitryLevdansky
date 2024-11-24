@@ -1,5 +1,4 @@
 import pandas as pd
-import pyodbc
 from sqlalchemy import create_engine
 
 # Укажите параметры подключения
