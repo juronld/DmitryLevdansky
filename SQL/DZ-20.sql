@@ -1,4 +1,9 @@
 --Напишите скрипт, который с помощью цикла и переменной выводит таблицу умножения для заданного числа.
+CREATE TABLE MyResult (
+						MyNumber INT,
+						MyCounter INT,
+						Result INT
+					   );
 
 DECLARE @ourNumber INT;
 DECLARE @Counter INT;
@@ -6,12 +11,7 @@ DECLARE @Result INT;
 SET @ourNumber=9;
 SET @Counter=1;
 
-CREATE TABLE MyResult (
-						MyNumber INT,
-						MyCounter INT,
-						Result INT
-					   );
-
+DELETE MyResult
 WHILE @Counter <= 20
 BEGIN
 	SET @Result= @Counter * @ourNumber;
@@ -22,7 +22,7 @@ END
 
 SELECT * FROM MyResult;
 
-DROP TABLE MyResult;
+--DROP TABLE MyResult;
 
 
 --Таблицы: HumanResources.Employee
@@ -42,7 +42,7 @@ WHERE he.HireDate < @ResultYear
 --Описание задачи: Напишите запрос с переменной и подзапросом, чтобы найти всех клиентов, которые потратили в сумме больше заданной суммы на все свои заказы.
 
 DECLARE @SumCount DECIMAL(18,2);
-SET @SumCount = 1000.00;
+SET @SumCount = 3000.00;
 
 SELECT sc.CustomerID,sc.AccountNumber, res.SumPerson
 FROM Sales.Customer sc
@@ -58,47 +58,33 @@ WHERE res.SumPerson > @SumCount
 --Sales.SalesOrderHeader
 --Production.Product
 --Описание задачи: Напишите запрос, который с использованием переменной и подзапроса определяет самый продаваемый товар (по количеству проданных единиц) для каждого года.
-DECLARE @Year INT;
+CREATE TABLE Result (ProductName NVARCHAR(MAX)
+       , TotalAmount INT
+       , OrderYear INT)
 
--- Создаем временную таблицу для хранения результатов
-CREATE TABLE TopProducts (
-    Year INT,
-    ProductID INT,
-    TotalQuantity INT
-);
+--DECLARE @Year INT
+--SELECT @Year = 2012
+DECLARE @Counter INT
+SELECT @Counter = YEAR(MIN(OrderDate))
+FROM Sales.SalesOrderHeader
 
--- Цикл по годам
-DECLARE @StartYear INT = 2000; -- Задайте начальный год
-DECLARE @EndYear INT = 2023;   -- Задайте конечный год
-
-WHILE @StartYear <= @EndYear
+WHILE @Counter <= (SELECT YEAR(MAX(OrderDate)) FROM Sales.SalesOrderHeader)
 BEGIN
-    SET @Year = @StartYear;
-	-- Подзапрос для нахождения самого продаваемого товара за текущий год
-    INSERT INTO TopProducts (Year, ProductID, TotalQuantity)
-    SELECT TOP 1 
-		   YEAR(soh.OrderDate) AS Year
-		 , sod.ProductID
-		 , SUM(sod.OrderQty) AS TotalQuantity
-    FROM Sales.SalesOrderHeader AS soh
-    JOIN Sales.SalesOrderDetail AS sod ON soh.SalesOrderID = sod.SalesOrderID
-    WHERE YEAR(soh.OrderDate) = @Year
-    GROUP BY sod.ProductID,soh.OrderDate
-    ORDER BY  TotalQuantity DESC;
-    SET @StartYear = @StartYear + 1;
+INSERT INTO Result 
+SELECT TOP 1  R.Name
+   , R. TotalAmount
+   , @Counter
+FROM (
+SELECT SUM(sod.OrderQty) AS TotalAmount
+  , pp.Name
+FROM Sales.SalesOrderDetail sod 
+JOIN Sales.SalesOrderHeader soh ON soh.SalesOrderID = sod.SalesOrderID
+JOIN Production.Product pp ON pp.ProductID = sod.ProductID
+WHERE YEAR(soh.OrderDate) = @Counter
+GROUP BY pp.Name ) R
+ORDER BY R.TotalAmount DESC
+
+SELECT @Counter = @Counter + 1
 END
-
--- Вывод результатов
-SELECT 
-    Year,
-    ProductID,
-    TotalQuantity
-FROM 
-    TopProducts
-ORDER BY 
-    Year;
-
--- Удаляем временную таблицу
-DROP TABLE TopProducts;
-
-
+--DELETE Result
+SELECT * FROM Result

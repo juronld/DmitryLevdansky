@@ -35,7 +35,7 @@ CREATE TABLE Loans (
 )
 
 --DROP TABLE Loans
---DELETE Books
+--DELETE Loans
 SELECT * FROM Books
 SELECT * FROM Borrowers
 SELECT * FROM Loans
