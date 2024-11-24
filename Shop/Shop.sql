@@ -48,10 +48,11 @@ CREATE TABLE Order_Items ( --товары в заказах
 	CONSTRAINT FK_Order_ID FOREIGN KEY (Order_ID) REFERENCES  Orders(ID) ON DELETE CASCADE,
 );
 
-DROP TABLE [dbo].[Categories]
 DROP TABLE [dbo].[Order_Items]
-DROP TABLE [dbo].[Orders]
 DROP TABLE [dbo].[Products]
+DROP TABLE [dbo].[Categories]
+DROP TABLE [dbo].[Orders]
+
 
 DELETE [dbo].[Categories]
 DELETE [dbo].[Order_Items]
