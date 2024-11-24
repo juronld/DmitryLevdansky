@@ -57,14 +57,32 @@ DELETE [dbo].[Products]
 Проверьте план выполнения (EXPLAIN).
 Перепишите запрос так, чтобы он выполнялся быстрее.
 */
+/*
+DROP INDEX IX_Product_ID ON Order_Items 
+DROP INDEX IX_Quantity ON Order_Items 
+DROP INDEX IX_ID ON Categories 
+DROP INDEX IX_ID ON Products 
+DROP INDEX IX_Category_ID ON Products 
+*/
+
+CREATE NONCLUSTERED INDEX IX_Product_ID ON Order_Items (Product_ID)
+CREATE NONCLUSTERED INDEX IX_Quantity ON Order_Items (Quantity)  --1 помог ускорить
+CREATE NONCLUSTERED INDEX IX_ID ON Categories (ID)
+CREATE NONCLUSTERED INDEX IX_Name ON Categories (Name) -- 2 помог ускорить
+CREATE NONCLUSTERED INDEX IX_Price ON Products (Price) -- 3 помог ускорить
+CREATE NONCLUSTERED INDEX IX_ID ON Products (ID)
+CREATE NONCLUSTERED INDEX IX_Category_ID ON Products (Category_ID)
+
+
+
 SELECT * FROM [dbo].[Categories]
 SELECT * FROM [dbo].[Order_Items]
 SELECT * FROM [dbo].[Orders]
 SELECT * FROM [dbo].[Products]
 
+SET STATISTICS TIME ON;
 
-SELECT cg.ID 
-	 , cg.Name
+SELECT cg.Name
 	 , SUM (pd.Price * oi.Quantity) as TotalSum
 	 , COUNT(oi.Quantity) as TotalCount
 	 , AVG(pd.Price) as AvgPrice
@@ -73,3 +91,5 @@ JOIN Products pd ON pd.Category_ID=cg.ID
 JOIN Order_Items oi ON oi.Product_ID=pd.ID
 GROUP BY cg.ID,cg.Name
 ORDER BY TotalCount desc
+
+SET STATISTICS TIME OFF;
