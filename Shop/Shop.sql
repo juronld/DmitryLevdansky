@@ -73,8 +73,6 @@ CREATE NONCLUSTERED INDEX IX_Price ON Products (Price) -- 3 помог уско�
 CREATE NONCLUSTERED INDEX IX_ID ON Products (ID)
 CREATE NONCLUSTERED INDEX IX_Category_ID ON Products (Category_ID)
 
-
-
 SELECT * FROM [dbo].[Categories]
 SELECT * FROM [dbo].[Order_Items]
 SELECT * FROM [dbo].[Orders]
